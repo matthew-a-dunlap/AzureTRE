@@ -147,6 +147,38 @@ export const ResourceForm: React.FunctionComponent<ResourceFormProps> = (
     "ui:widget": "textarea",
   };
 
+  // Set ui:emptyValue for all fields based on their type to ensure cleared fields are included in form submission
+  if (template && template.properties) {
+    Object.keys(template.properties).forEach((fieldName) => {
+      const fieldSchema = template.properties[fieldName];
+      if (!uiSchema[fieldName]) {
+        uiSchema[fieldName] = {};
+      }
+      
+      // Only set ui:emptyValue if not already defined in the template's uiSchema
+      if (uiSchema[fieldName]["ui:emptyValue"] === undefined) {
+        switch (fieldSchema.type) {
+          case "string":
+            uiSchema[fieldName]["ui:emptyValue"] = "";
+            break;
+          case "number":
+          case "integer":
+            uiSchema[fieldName]["ui:emptyValue"] = null;
+            break;
+          case "boolean":
+            uiSchema[fieldName]["ui:emptyValue"] = null;
+            break;
+          case "array":
+            uiSchema[fieldName]["ui:emptyValue"] = [];
+            break;
+          case "object":
+            uiSchema[fieldName]["ui:emptyValue"] = {};
+            break;
+        }
+      }
+    });
+  }
+  
   // if no specific order has been set, set a generic one with the primary fields at the top
   if (!uiSchema["ui:order"] || uiSchema["ui:order"].length === 0) {
     uiSchema["ui:order"] = ["display_name", "description", "overview", "*"];
